@@ -1,14 +1,50 @@
 const express = require('express');
 
 const app = express();
+app.use(express.json());
+
+
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     next();
-  });
+  }); // Middleware général appliqué à toutes les requêtes envoyées au serveur
 
- app.use('/api/books', (req, res, next) => {
+
+
+app.post('/api/auth/signup', signUp)
+app.post('/api/auth/login', login)
+
+ function signUp(req, res, next) { 
+  const body = req.body;
+  console.log("body:", body);
+    res.status(201).json({ message: 'Utilisateur créé !' });
+  }; // Middleware POST pour créer un utilisateur
+
+
+function login(req, res, next) {
+  const body = req.body;
+  console.log("body:", body);
+    res.status(200).json({ userId: "123", token:"token"});
+    
+  }; // Middleware POST pour connecter un utilisateur
+
+
+
+
+
+
+
+
+
+
+   // Middleware POST pour créer un objet
+
+
+
+ app.get('/api/books', (req, res, next) => {
     const books = [ 
         
         {
