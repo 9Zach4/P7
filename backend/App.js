@@ -1,6 +1,13 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const app = express();
+mongoose.connect('mongodb+srv://JonhC:chocolat@cluster0.7afshel.mongodb.net/?retryWrites=true&w=majority',
+  { useNewUrlParser: true,
+    useUnifiedTopology: true })
+  .then(() => console.log('Connexion à MongoDB réussie !'))
+  .catch(() => console.log('Connexion à MongoDB échouée !'));
+
 app.use(express.json());
 
 
@@ -32,15 +39,6 @@ function login(req, res, next) {
   }; // Middleware POST pour connecter un utilisateur
 
 
-
-
-
-
-
-
-
-
-   // Middleware POST pour créer un objet
 
 
 
