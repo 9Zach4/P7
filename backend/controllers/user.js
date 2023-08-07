@@ -21,7 +21,7 @@ exports.login = (req, res, next) => {
     User.findOne ({ email: req.body.email }) // recherche de l'utilisateur dans la base de données
         .then(user => {
         if (!user) {  
-            res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' });
+           return res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' });
         } else {
             bcrypt.compare(req.body.password, user.password) 
             // comparaison du mot de passe entré avec le hash enregistré dans la base de données
@@ -30,9 +30,9 @@ exports.login = (req, res, next) => {
                 res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' }); // si le mot de passe est incorrect
                 } else {
                     res.status(200).json({
-                        userID: user._id,
+                        userId: user._id,
                         token: jwt.sign(
-                          { userID: user._id }, // encodage de l'ID de l'utilisateur
+                          { userId: user._id }, // encodage de l'ID de l'utilisateur
                           'RANDOM_TOKEN_SECRET',
                           { expiresIn: '24h'} // création d'un token d'authentification
                         )  
