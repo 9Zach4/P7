@@ -19,12 +19,12 @@ exports.signUp = (req, res, next) => {
 exports.login = (req, res, next) => {
     User.findOne ({ email: req.body.email })
         .then(user => {
-        if (user === null) {  
+        if (!user) {  
             res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' });
         } else {
             bcrypt.compare(req.body.password, user.password)
             .then (valid => {
-                if(valid) {
+                if(!valid) {
                 res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' });
                 } else {
                     res.status(200).json({
