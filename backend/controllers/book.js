@@ -1,6 +1,6 @@
 const Book = require('../models/Books');
 
-
+//expots des fonctions pour les routes de gestion des livres
 exports.createBook = (req, res, next) => { 
   delete req.body._id;
   const book = new Book({
