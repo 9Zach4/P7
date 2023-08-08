@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 
-exports.signUp = (req, res, next) => {
+exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.password, 10) // hashage du mot de passe avec bcrypt
         .then(hash => { 
             const user = new User({ // création d'un nouvel utilisateur
@@ -22,12 +22,13 @@ exports.login = (req, res, next) => {
         .then(user => {
         if (!user) {  
            return res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' });
+           
         } else {
             bcrypt.compare(req.body.password, user.password) 
             // comparaison du mot de passe entré avec le hash enregistré dans la base de données
             .then (valid => {
                 if(!valid) {
-                res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' }); // si le mot de passe est incorrect
+                return res.status(401).json({ error: 'Paire indentifiant/mot de passe incorecte !' }); // si le mot de passe est incorrect
                 } else {
                     res.status(200).json({
                         userId: user._id,
@@ -36,11 +37,14 @@ exports.login = (req, res, next) => {
                           'RANDOM_TOKEN_SECRET',
                           { expiresIn: '24h'} // création d'un token d'authentification
                         )  
+                       
                     }); 
+                   
                 }
             })
             .catch(error => res.status(500).json({ error }));
         }
         })
         .catch (error => res.status(500).json({ error }));
+        
 }; // export de la fonction login pour la connexion d'un utilisateur existant

@@ -10,8 +10,11 @@ mongoose.connect('mongodb+srv://JonhC:chocolat@cluster0.7afshel.mongodb.net/?ret
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 // importation des routes d'authentification et de gestion des livres
+app.use(express.json());
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
+
+
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,7 +24,7 @@ app.use((req, res, next) => {
 }); // Middleware général appliqué à toutes les requêtes envoyées au serveur
 
 
-app.use(express.json());
+
 
 app.use('/api/books', bookRoutes)
 app.use('/api/auth', userRoutes)
