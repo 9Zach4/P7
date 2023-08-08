@@ -15,6 +15,74 @@ exports.createBook = (req, res, next) => {
     .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
     .catch(error => res.status(400).json({ error }));
 }; 
+  
+exports.getBestBooks = async (req, res) => {
+    try {
+        // Utiliser l'agrégation MongoDB pour projeter les champs souhaités et calculer la moyenne des notes
+        const books = await Book.aggregate([
+            {
+                $project: {
+                    title: 1,
+                    imageUrl: 1,
+                    author: 1,
+                    year: 1,
+                    genre: 1,
+                    averageRating: { $avg: '$ratings.grade' },
+                },
+            },
+            {
+                $sort: { averageRating: -1 },
+            },
+            {
+                $limit: 3,
+            },
+        ])
+
+        // Envoyer une réponse avec les meilleurs livres
+        res.status(200).json(books)
+    } catch (error) {
+        // Gérer les erreurs et renvoyer une réponse avec l'erreur
+        res.status(400).json({ error })
+    }
+};
+
+exports.bookRating = async (req, res) => {
+  const userId = req.user.id; 
+  const bookId = req.params.id;
+  const { rating } = req.body;
+
+  if (rating < 0 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 0 and 5' });
+  }
+
+  try {
+      const book = await Book.findById(bookId);
+
+      if (!book) {
+          return res.status(404).json({ error: 'Book not found' });
+      }
+
+      const alreadyRated = book.ratings.find(rating => rating.userId === userId);
+
+      if (alreadyRated) {
+          return res.status(400).json({ error: 'You have already rated this book' });
+      }
+
+      book.ratings.push({ userId, rating });
+      book.averageRating = calculateAverageRating(book.ratings);
+
+      await book.save();
+
+      return res.status(200).json(book);
+  } catch (error) {
+      return res.status(500).json({ error: 'An error occurred while submitting the rating' });
+  }
+};
+
+function calculateAverageRating(ratings) {
+  const totalRating = ratings.reduce((sum, rating) => sum + rating.rating, 0);
+  return totalRating / ratings.length;
+}
 
 exports.modifyBook = (req, res, next) => { 
   const bookObject = req.file ? {
@@ -38,6 +106,9 @@ exports.modifyBook = (req, res, next) => {
       res.status(400).json({ error });
     });
 };
+
+
+
 
 
 
