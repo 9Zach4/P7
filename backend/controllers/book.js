@@ -18,33 +18,29 @@ exports.createBook = (req, res, next) => {
 }; 
   
 exports.getBestBooks = async (req, res) => {
-    try {
-        const books = await Book.aggregate([
-            {
-                $project: {
-                    title: 1,
-                    imageUrl: 1,
-                    author: 1,
-                    year: 1,
-                    genre: 1,
-                    averageRating: { $avg: '$ratings.grade' },
-                },
-            },
-            {
-                $sort: { averageRating: -1 },
-            },
-            {
-                $limit: 3,
-            },
-        ])
+  const bestBooks = [
+      {
+          $project: {
+              title: 1,
+              imageUrl: 1,
+              author: 1,
+              year: 1,
+              genre: 1,
+              averageRating: { $avg: '$ratings.grade' },
+          },
+      },
+      { $sort: { averageRating: -1 } },
+      { $limit: 3 }
+  ];
 
-        res.status(200).json(books)
-    } catch (error) {
-        res.status(400).json({ error })
-    }
+  try {
+      const books = await Book.aggregate(bestBooks);
+      return res.json(books);
+  } catch (error) {
+      return res.status(400).json({ error });
+  }
 };
-
-exports.bookRating = async (req, res, next) => {
+exports.bookRating = async (req, res, next) => { //ajout d'une note à un livre
   const bookId = req.params.id;
   const {userId, rating} = req.body;
   if (rating < 0 || rating > 5) { 
@@ -57,21 +53,19 @@ exports.bookRating = async (req, res, next) => {
     }
     const ratingIndex = book.ratings.findIndex(rating => rating.userId === userId);
     if (ratingIndex !== -1) {
-      book.ratings[ratingIndex].grade = rating;
+      book.ratings[ratingIndex].grade = rating; //si l'utilisateur a déjà noté le livre, on modifie sa note 
     } else {
       book.ratings.push({ userId, grade: rating });
     }
     const totalRating = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);
-    book.averageRating = totalRating / book.ratings.length;
+    book.averageRating = totalRating / book.ratings.length; //calcul de la moyenne des notes
     await book.save();
     res.status(200).json(book);
   }
   catch (error) {
     res.status(400).json({ error });
   }
-
 };
-
 
 exports.modifyBook = (req, res, next) => { 
   const bookObject = req.file ? {
@@ -96,13 +90,11 @@ exports.modifyBook = (req, res, next) => {
     });
 };
 
-
 exports.deleteBook = (req, res, next) => { 
   Book.findOne({ _id: req.params.id })
     .then(book => {
       if (book.userId!=req.auth.userId){
           res.status(401).json({message : 'Non-autorisé !'});
-
       } else {
         const filename = book.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {

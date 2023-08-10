@@ -37,14 +37,11 @@ exports.login = (req, res, next) => {
                           'RANDOM_TOKEN_SECRET',
                           { expiresIn: '24h'} // création d'un token d'authentification
                         )  
-                       
                     }); 
-                   
                 }
             })
             .catch(error => res.status(500).json({ error }));
         }
         })
-        .catch (error => res.status(500).json({ error }));
-        
+        .catch (error => res.status(500).json({ error }));       
 }; // export de la fonction login pour la connexion d'un utilisateur existant
