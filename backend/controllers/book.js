@@ -4,8 +4,8 @@ const fs = require('fs');
 //expots des fonctions pour les routes de gestion des livres
 exports.createBook = (req, res, next) => { 
   const bookObject = JSON.parse(req.body.book);
-  delete bookObject._id;
-  delete bookObject._userId;
+  // delete bookObject._id;
+  // delete bookObject._userId;
   const book = new Book ({
     ...bookObject,
     userId: req.auth.userId,
@@ -40,6 +40,7 @@ exports.getBestBooks = async (req, res) => {
       return res.status(400).json({ error });
   }
 };
+
 exports.bookRating = async (req, res, next) => { //ajout d'une note à un livre
   const bookId = req.params.id;
   const {userId, rating} = req.body;

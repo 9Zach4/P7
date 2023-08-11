@@ -6,7 +6,6 @@ const bookCrtl = require('../controllers/book');
 
 
 
-
 router.post('/', auth, imgUpload, imgSize, bookCrtl.createBook)
 router.get('/bestrating', bookCrtl.getBestBooks);
 router.post('/:id/rating', auth, bookCrtl.bookRating);
