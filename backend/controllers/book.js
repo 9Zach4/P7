@@ -6,34 +6,34 @@ exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   delete bookObject._id
   delete bookObject._userId
-  const book = new Book ({
+  const book = new Book ({ // création d'un nouvel objet Book
     ...bookObject,
     userId: req.auth.userId,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //création de l'URL de l'image
   });
 
   book.save()
-    .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
+    .then(() => res.status(201).json({ message: 'Objet enregistré !'})) // enregistrement du livre dans la base de données
     .catch(error => res.status(400).json({ error }));
 }; 
   
-exports.getBestBooks = async (req, res) => {
+exports.getBestBooks = async (req, res) => { //fonction pour la récupération des 3 meilleurs livres
   const bestBooks = [
       {
           $project: {
               title: 1,
               imageUrl: 1,
               author: 1,
-              year: 1,
+              year: 1, //récupération des données du livre
               genre: 1,
-              averageRating: { $avg: '$ratings.grade' },
+              averageRating: { $avg: '$ratings.grade' }, //calcul de la moyenne des notes
           },
       },
       { $sort: { averageRating: -1 } },
       { $limit: 3 }
   ];
 
-  try {
+  try { //récupération des 3 meilleurs livres
       const books = await Book.aggregate(bestBooks);
       return res.json(books);
   } catch (error) {
@@ -55,7 +55,7 @@ exports.bookRating = async (req, res, next) => {
   try {  
     const book = await Book.findById(bookId);
     if (!book) {
-      return res.status(404).json({ error: 'Livre non trouvé !' });
+      return res.status(404).json({ error: 'Livre non trouvé !' }); //si le livre n'existe pas
     }
     const ratingIndex = book.ratings.findIndex(rating => rating.userId === userId);
     if (ratingIndex !== -1) {
@@ -73,39 +73,39 @@ exports.bookRating = async (req, res, next) => {
   }
 };
 
-exports.modifyBook = (req, res, next) => { 
+exports.modifyBook = (req, res, next) => {  //fonction pour la modification d'un livre
   const bookObject = req.file ? {
     ...JSON.parse(req.body.book),
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //création de l'URL de l'image
   } : { ...req.body };
 
-  delete bookObject._userId
+  delete bookObject._userId //suppression de l'ID de l'utilisateur
   Book.findOne({ _id: req.params.id })
     .then(book => {
       if (book.userId!=req.auth.userId){
           res.status(401).json({message : 'Non-autorisé !'});
 
       } else {
-        Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+        Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id }) //modification du livre dans la base de données
         .then(() => res.status(200).json({ message: 'Objet modifié !'}))
-        .catch(error => res.status(400).json({ error }));
+        .catch(error => res.status(400).json({ error })); 
       }
     })
     .catch(error => {
-      res.status(400).json({ error });
+      res.status(400).json({ error }); //si le livre n'existe pas
     });
 };
 
-exports.deleteBook = (req, res, next) => { 
+exports.deleteBook = (req, res, next) => {  //fonction pour la suppression d'un livre
   Book.findOne({ _id: req.params.id })
-    .then(book => {
-      if (book.userId!=req.auth.userId){
+    .then(book => { //recherche du livre dans la base de données
+      if (book.userId!=req.auth.userId){ //si l'utilisateur n'est pas l'auteur du livre
           res.status(401).json({message : 'Non-autorisé !'});
       } else {
-        const filename = book.imageUrl.split('/images/')[1];
+        const filename = book.imageUrl.split('/images/')[1]; //suppression de l'image du livre
         fs.unlink(`images/${filename}`, () => {
           Book.deleteOne({ _id: req.params.id })
-            .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
+            .then(() => res.status(200).json({ message: 'Objet supprimé !'})) //suppression du livre dans la base de données
             .catch(error => res.status(400).json({ error }));
         });
       } 
@@ -115,13 +115,13 @@ exports.deleteBook = (req, res, next) => {
     });
 };
 
-exports.getOneBook = (req, res, next) => { 
+exports.getOneBook = (req, res, next) => {  //fonction pour la récupération d'un livre
   Book.findOne({ _id: req.params.id })
     .then(book => res.status(200).json(book))
     .catch(error => res.status(404).json({ error }));
 };
 
-exports.getAllBooks = (req, res, next) => { 
+exports.getAllBooks = (req, res, next) => {  //fonction pour la récupération de tous les livres
   Book.find()
     .then(book => res.status(200).json(book))
     .catch(error => res.status(404).json({ error }));

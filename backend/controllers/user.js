@@ -6,10 +6,10 @@ const User = require('../models/User');
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // regex pour l'email
 
 
-exports.signup = (req, res, next) => {
+exports.signup = (req, res, next) => { // fonction pour l'inscription d'un nouvel utilisateur
 
     if (!emailRegex.test(req.body.email)) {
-        return res.status(400).json({ message: "L'email n'est pas valide." });
+        return res.status(400).json({ message: "L'email n'est pas valide." }); 
     }
 
     const password = req.body.password;
