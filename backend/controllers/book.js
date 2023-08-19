@@ -4,8 +4,8 @@ const fs = require('fs');
 //expots des fonctions pour les routes de gestion des livres
 exports.createBook = (req, res, next) => { 
   const bookObject = JSON.parse(req.body.book);
-  // delete bookObject._id;
-  // delete bookObject._userId;
+  delete bookObject._id
+  delete bookObject._userId
   const book = new Book ({
     ...bookObject,
     userId: req.auth.userId,
@@ -41,12 +41,17 @@ exports.getBestBooks = async (req, res) => {
   }
 };
 
-exports.bookRating = async (req, res, next) => { //ajout d'une note à un livre
-  const bookId = req.params.id;
-  const {userId, rating} = req.body;
+exports.bookRating = async (req, res, next) => {
+   //ajout d'une note à un livre
+
+
+  const bookId = req.params.id; //récupération de l'ID du livre
+  const {userId, rating} = req.body; //récupération de l'ID de l'utilisateur et de la note
   if (rating < 0 || rating > 5) { 
     return res.status(400).json({ error: 'La note doit être comprise entre 0 et 5' });
   }
+
+  
   try {  
     const book = await Book.findById(bookId);
     if (!book) {

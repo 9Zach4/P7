@@ -3,8 +3,20 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 
+const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // regex pour l'email
+
+
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10) // hashage du mot de passe avec bcrypt
+
+    if (!emailRegex.test(req.body.email)) {
+        return res.status(400).json({ message: "L'email n'est pas valide." });
+    }
+
+    const password = req.body.password;
+    if (password.length < 12) {
+        return res.status(400).json({ message: "Le mot de passe doit avoir au moins 12 caractères." });
+    }
+    bcrypt.hash(password, 12) // hashage du mot de passe avec bcrypt
         .then(hash => { 
             const user = new User({ // création d'un nouvel utilisateur
                 email: req.body.email,

@@ -1,13 +1,17 @@
 const express = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
 const path = require('path');
 const app = express();
 
-mongoose.connect('mongodb+srv://JonhC:chocolat@cluster0.7afshel.mongodb.net/?retryWrites=true&w=majority',
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
+const uri = process.env.MONGODB_URI;
+
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connexion à MongoDB réussie !'))
+.catch(() => console.log('Connexion à MongoDB échouée !'));
 
 // importation des routes d'authentification et de gestion des livres
 app.use(express.json());
