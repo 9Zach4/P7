@@ -59,15 +59,7 @@ exports.bookRating = async (req, res, next) => {
     const ratingIndex = book.ratings.findIndex(rating => rating.userId == req.auth.userId);
 
     if (ratingIndex !== -1) {
-      if (book.ratings[ratingIndex].userId === req.auth.userId) {
-        if (book.ratings[ratingIndex].grade !== rating) {
-          book.ratings[ratingIndex].grade = rating;
-        } else {
-          return res.status(400).json({ error: 'La note est déjà définie à cette valeur.' });
-        }
-      } else {
-        throw new Error("Vous n'êtes pas autorisé à modifier cette note.");
-      }
+          return res.status(400).json({ error: 'Déjà noté' });
     } else {
       book.ratings.push({ userId, grade: rating });
     }
