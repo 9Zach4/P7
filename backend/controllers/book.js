@@ -42,36 +42,47 @@ exports.getBestBooks = async (req, res) => { //fonction pour la récupération d
 };
 
 exports.bookRating = async (req, res, next) => {
-   //ajout d'une note à un livre
+  const bookId = req.params.id;
+  const { userId, rating } = req.body;
 
-
-  const bookId = req.params.id; //récupération de l'ID du livre
-  const {userId, rating} = req.body; //récupération de l'ID de l'utilisateur et de la note
-  if (rating < 0 || rating > 5) { 
+  if (rating < 0 || rating > 5) {
     return res.status(400).json({ error: 'La note doit être comprise entre 0 et 5' });
   }
 
-  
-  try {  
+  try {
     const book = await Book.findById(bookId);
+
     if (!book) {
-      return res.status(404).json({ error: 'Livre non trouvé !' }); //si le livre n'existe pas
+      return res.status(404).json({ error: 'Livre non trouvé !' });
     }
-    const ratingIndex = book.ratings.findIndex(rating => rating.userId === userId);
+
+    const ratingIndex = book.ratings.findIndex(rating => rating.userId === req.auth.userId);
+
     if (ratingIndex !== -1) {
-      book.ratings[ratingIndex].grade = rating; //si l'utilisateur a déjà noté le livre, on modifie sa note 
+      if (book.ratings[ratingIndex].userId == req.auth.userId) {
+        if (book.ratings[ratingIndex].grade !== rating) {
+          book.ratings[ratingIndex].grade = rating;
+        } else {
+          return res.status(400).json({ error: 'La note est déjà définie à cette valeur.' });
+        }
+      } else {
+        throw new Error("Vous n'êtes pas autorisé à modifier cette note.");
+      }
     } else {
       book.ratings.push({ userId, grade: rating });
     }
+
     const totalRating = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);
-    book.averageRating = totalRating / book.ratings.length; //calcul de la moyenne des notes
+    book.averageRating = totalRating / book.ratings.length;
+    book.averageRating = book.averageRating.toFixed(1);
+    
     await book.save();
     res.status(200).json(book);
-  }
-  catch (error) {
-    res.status(400).json({ error });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };
+
 
 exports.modifyBook = (req, res, next) => {  //fonction pour la modification d'un livre
   const bookObject = req.file ? {
