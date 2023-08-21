@@ -59,7 +59,7 @@ exports.bookRating = async (req, res, next) => {
     const ratingIndex = book.ratings.findIndex(rating => rating.userId == req.auth.userId);
 
     if (ratingIndex !== -1) {
-      if (book.ratings[ratingIndex].userId == req.auth.userId) {
+      if (book.ratings[ratingIndex].userId === req.auth.userId) {
         if (book.ratings[ratingIndex].grade !== rating) {
           book.ratings[ratingIndex].grade = rating;
         } else {
