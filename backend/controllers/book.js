@@ -56,7 +56,7 @@ exports.bookRating = async (req, res, next) => {
       return res.status(404).json({ error: 'Livre non trouvé !' });
     }
 
-    const ratingIndex = book.ratings.findIndex(rating => rating.userId === req.auth.userId);
+    const ratingIndex = book.ratings.findIndex(rating => rating.userId == req.auth.userId);
 
     if (ratingIndex !== -1) {
       if (book.ratings[ratingIndex].userId == req.auth.userId) {
